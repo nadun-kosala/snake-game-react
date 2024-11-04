@@ -41,5 +41,6 @@ Open http://localhost:5173 in your browser to play.
 - React - Frontend framework
 - JavaScript - Game logic and control handling
 
+Web Link for the game [Snake Game](https://snack-game-react.netlify.app/)
 
 Enjoy the game, and feel free to contribute or report issues on [GitHub](https://github.com/nadun-kosala/snake-game-react)!
