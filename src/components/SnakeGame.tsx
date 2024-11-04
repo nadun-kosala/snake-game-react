@@ -231,6 +231,37 @@ export default function SnakeGame() {
       <div className="mt-4 text-gray-400 text-sm">
         Use arrow keys to control the snake
       </div>
+      <div>
+      <footer className="text-white py-4 mt-20 flex justify-center items-center">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
+        <div className="text-sm mr-5">
+          <span>&copy; {new Date().getFullYear()} - Developed by Nadun Kosala</span>
+        </div>
+       
+      </div>
+     
+    </footer>
+    <div className='mt-0 flex justify-center items-center'>
+      <div className="flex space-x-4 mt-2 md:mt-0 gap-2">
+          <a
+            href="https://github.com/nadun-kosala"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-white"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://kosala.pages.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-white"
+          >
+            Website
+          </a>
+        </div>
+      </div>
+      </div>
     </div>
   );
 }
