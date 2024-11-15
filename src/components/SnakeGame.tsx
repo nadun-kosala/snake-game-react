@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Apple, PlayCircle, RotateCcw, Crown, Volume2, Volume1 } from 'lucide-react';
+import { Apple, PlayCircle, RotateCcw, Crown, Volume2, Volume1, Smartphone } from 'lucide-react';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 type Position = { x: number; y: number };
@@ -9,6 +9,7 @@ const GRID_SIZE = 20;
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 150;
 const SPEED_INCREMENT = 5;
+const SWIPE_THRESHOLD = 50;
 
 export default function SnakeGame() {
   const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
@@ -19,6 +20,7 @@ export default function SnakeGame() {
   const [highScore, setHighScore] = useState(0);
   const [speed, setSpeed] = useState(INITIAL_SPEED);
   const [isMuted, setIsMuted] = useState(false);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
   const playSound = (frequency: number) => {
     if (isMuted) return;
@@ -56,17 +58,9 @@ export default function SnakeGame() {
   };
 
   const checkCollision = (head: Position): boolean => {
-    // Wall collision
-    if (
-      head.x < 0 ||
-      head.x >= GRID_SIZE ||
-      head.y < 0 ||
-      head.y >= GRID_SIZE
-    ) {
+    if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
       return true;
     }
-
-    // Self collision
     return snake.some((segment) => segment.x === head.x && segment.y === head.y);
   };
 
@@ -100,7 +94,6 @@ export default function SnakeGame() {
 
       const newSnake = [head, ...prevSnake];
 
-      // Check if snake ate food
       if (head.x === food.x && head.y === food.y) {
         setFood(generateFood());
         setScore((prev) => prev + 1);
@@ -113,6 +106,43 @@ export default function SnakeGame() {
       return newSnake;
     });
   }, [direction, food, generateFood, isGameOver, score]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart || isGameOver) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD && Math.abs(deltaY) < SWIPE_THRESHOLD) return;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if (deltaX > 0) {
+        setDirection((prev) => prev !== 'LEFT' ? 'RIGHT' : prev);
+      } else {
+        setDirection((prev) => prev !== 'RIGHT' ? 'LEFT' : prev);
+      }
+    } else {
+      // Vertical swipe
+      if (deltaY > 0) {
+        setDirection((prev) => prev !== 'UP' ? 'DOWN' : prev);
+      } else {
+        setDirection((prev) => prev !== 'DOWN' ? 'UP' : prev);
+      }
+    }
+
+    setTouchStart(null);
+  };
+
+  const handleTouchEnd = () => {
+    setTouchStart(null);
+  };
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -164,11 +194,14 @@ export default function SnakeGame() {
       </div>
 
       <div 
-        className="relative bg-gray-800 rounded-lg shadow-xl overflow-hidden mb-6"
+        className="relative bg-gray-800 rounded-lg shadow-xl overflow-hidden mb-6 touch-none"
         style={{
           width: GRID_SIZE * CELL_SIZE,
           height: GRID_SIZE * CELL_SIZE,
         }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Food */}
         <motion.div
@@ -228,11 +261,14 @@ export default function SnakeGame() {
         </motion.button>
       )}
 
-      <div className="mt-4 text-gray-400 text-sm">
-        Use arrow keys to control the snake
-      </div>
-      <div>
-      <footer className="text-white py-4 mt-20 flex justify-center items-center">
+      <div className="mt-4 text-gray-400 text-sm flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2">
+          <Smartphone className="w-4 h-4" />
+          Swipe to control on mobile
+        </div>
+        <div>Use arrow keys to control on desktop</div>
+
+        <footer className="text-white py-4 mt-20 flex justify-center items-center">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
         <div className="text-sm mr-5">
           <span>&copy; {new Date().getFullYear()} - Developed by Nadun Kosala</span>
